@@ -21,14 +21,20 @@ class TodoPage extends Component {
 
     getTodos = () => {
         return axios.get('http://localhost:3001/todos')
-                .then((response) => {
-                    console.log(response);
-                    this.setState({
-                        todos: response.data
-                    });
-                }).catch((error) => {
-                    console.error(error);
-                })
+            .then((response) => {
+                console.log(response);
+                this.setState({
+                    todos: response.data
+                });
+            }).catch((error) => {
+                console.error(error);
+            })
+    }
+    onEditarClick = (todo) => {
+        this.setState({
+            showForm: true,
+            selectedTodo: todo,
+        })
     }
 
     onExcluirClick = (todo) => {
@@ -59,7 +65,9 @@ class TodoPage extends Component {
                     <td>{todo.completed}</td>
                     <td>
                         <ButtonGroup bsSize="small">
-                            <Button bsStyle="warning">Editar</Button>
+                            <Button bsStyle="warning"
+                                onClick={() => this.onEditarClick(todo)}>
+                                Editar</Button>
                             <Button bsStyle="danger"
                                 onClick={() => this.onExcluirClick(todo)}>
                                 Excluir
@@ -74,22 +82,48 @@ class TodoPage extends Component {
     }
 
     onNewTodoClick = () => {
-        this.setState({ showForm: true })
+        this.setState({
+            showForm: true,
+            selectedTodo: {
+                id: '',
+                title: '',
+                description: '',
+            }
+        })
     }
 
     onFormClose = () => {
         this.setState({ showForm: false })
     }
 
-    onTodoSave = (title, description) => {
+    onTodoSave = (id, title, description) => {
         const data = {
             title: title,
             description: description
+        };
+        if (id) {
+            //PUT
+            this.putTodo(id, data);
+        } else {
+            //POST
+            this.postTodo(data);
         }
-
+    }
+    postTodo = (data) => {
         axios.post('http://localhost:3001/todos/', data)
             .then((response) => {
                 if (response.status === 201) {
+                    this.setState({ showForm: false });
+                    return this.getTodos();
+                }
+            }).catch((ex) => {
+                console.warn(ex);
+            })
+    }
+    putTodo = (id, data) => {
+        axios.put('http://localhost:3001/todos/'+ id, data)
+            .then((response) => {
+                if (response.status === 200) {
                     this.setState({ showForm: false });
                     return this.getTodos();
                 }
@@ -127,7 +161,8 @@ class TodoPage extends Component {
                 </Table>
 
                 <TodoForm showForm={showForm} onClose={this.onFormClose}
-                    onSave={this.onTodoSave} />
+                    onSave={this.onTodoSave}
+                    selectedTodo={this.state.selectedTodo} />
             </section>
         );
     }
