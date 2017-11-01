@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-
 import {
     Table, Button,
     ButtonGroup,
@@ -23,11 +22,12 @@ class TodoTable extends Component {
                             <Button bsStyle="warning"
                                 onClick={() => onEditarClick(todo)}>
                                 Editar
-                                </Button>
+                            </Button>
                             <Button bsStyle="danger"
                                 onClick={() => onExcluirClick(todo)}>
                                 Excluir
                             </Button>
+
                         </ButtonGroup>
                     </td>
                 </tr>
@@ -36,6 +36,7 @@ class TodoTable extends Component {
 
         return todosComponents;
     }
+
     render() {
         return (
             <Table>
@@ -55,4 +56,5 @@ class TodoTable extends Component {
         )
     }
 }
+
 export default TodoTable;

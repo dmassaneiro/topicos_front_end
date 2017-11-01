@@ -4,7 +4,6 @@ import axios from 'axios';
 
 import {
     Button,
-    Modal,
 } from 'react-bootstrap';
 
 import TodoForm from '../components/TodoForm';
@@ -16,12 +15,13 @@ class TodoPage extends Component {
         todos: []
     }
 
+    // executado após a página ser carregada
     componentDidMount() {
         this.getTodos();
     }
 
     getTodos = () => {
-        return axios.get('http://localhost:3001/todos')
+        return axios.get('http://localhost:3001/todos/')
             .then((response) => {
                 console.log(response);
                 this.setState({
@@ -31,27 +31,29 @@ class TodoPage extends Component {
                 console.error(error);
             })
     }
-    onEditarClick = (todo) => {
-        this.setState({
-            showForm: true,
-            selectedTodo: todo,
-        })
-    }
 
     onExcluirClick = (todo) => {
-        const confirm = window.confirm("Deseja excluir a tarefa " + todo.id + "?");
+        const confirm =
+            window.confirm("Deseja excluir a tarefa '" + todo.title + "'?");
 
         if (confirm) {
             const url = "http://localhost:3001/todos/" + todo.id;
             axios.delete(url)
                 .then((response) => {
-                    if (response.status == 200) {
+                    if (response.status === 204) {
                         return this.getTodos();
                     }
                 }).catch((ex) => {
                     console.warn(ex);
                 })
         }
+    }
+
+    onEditarClick = (todo) => {
+        this.setState({
+            showForm: true,
+            selectedTodo: todo,
+        })
     }
 
     onNewTodoClick = () => {
@@ -75,13 +77,25 @@ class TodoPage extends Component {
             description: description
         };
         if (id) {
-            //PUT
             this.putTodo(id, data);
         } else {
-            //POST
             this.postTodo(data);
         }
     }
+
+    putTodo = (id, data) => {
+        const url = 'http://localhost:3001/todos/' + id;
+        axios.put(url, data)
+            .then((response) => {
+                if (response.status === 200) {
+                    this.setState({ showForm: false });
+                    return this.getTodos();
+                }
+            }).catch((ex) => {
+                console.warn(ex);
+            });
+    }
+
     postTodo = (data) => {
         axios.post('http://localhost:3001/todos/', data)
             .then((response) => {
@@ -93,21 +107,9 @@ class TodoPage extends Component {
                 console.warn(ex);
             })
     }
-    putTodo = (id, data) => {
-        axios.put('http://localhost:3001/todos/'+ id, data)
-            .then((response) => {
-                if (response.status === 200) {
-                    this.setState({ showForm: false });
-                    return this.getTodos();
-                }
-            }).catch((ex) => {
-                console.warn(ex);
-            })
-    }
 
     render() {
         const todos = this.state.todos;
-        const showForm = this.state.showForm;
 
         return (
             <section>
@@ -119,11 +121,11 @@ class TodoPage extends Component {
                 </Button>
 
                 <TodoTable todos={todos}
-                onEditarClick={this.onEditarClick}
-                onExcluirClick={this.onExcluirClick}
-                />
-                
-                <TodoForm showForm={showForm} onClose={this.onFormClose}
+                    onEditarClick={this.onEditarClick}
+                    onExcluirClick={this.onExcluirClick} />
+
+                <TodoForm showForm={this.state.showForm}
+                    onClose={this.onFormClose}
                     onSave={this.onTodoSave}
                     selectedTodo={this.state.selectedTodo} />
             </section>

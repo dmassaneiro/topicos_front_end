@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-
 import {
     Button, Modal, FormGroup, FormControl,
     ControlLabel,
@@ -13,11 +12,9 @@ class TodoForm extends Component {
     componentWillReceiveProps(nextProps) {
         const selectedTodo = nextProps.selectedTodo;
         this.setState({
-
             id: selectedTodo.id,
             title: selectedTodo.title,
             description: selectedTodo.description,
-
         });
     }
 
@@ -33,11 +30,10 @@ class TodoForm extends Component {
         const { id, title, description } = this.state;
 
         if (!title || !description) {
-            alert("Preencha o titulo e a descrição da tarefa!");
+            alert('Preencha o título e a descrição da tarefa.');
             return;
         }
 
-        this.setState({ title: "", description: "" });
         this.props.onSave(id, title, description);
     }
 
@@ -62,7 +58,8 @@ class TodoForm extends Component {
                         </FormGroup>
                         <FormGroup>
                             <ControlLabel>Descrição</ControlLabel>
-                            <FormControl componentClass="textarea" value={description} onChange={this.onDescriptionChange} />
+                            <FormControl componentClass="textarea"
+                                value={description} onChange={this.onDescriptionChange} />
                         </FormGroup>
                     </form>
                 </Modal.Body>
