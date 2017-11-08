@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 import {
-    Button,
+    Button, FormControl, InputGroup, FormGroup,
 } from 'react-bootstrap';
 
 import TodoForm from '../components/TodoForm';
@@ -12,7 +12,11 @@ import TodoTable from '../components/TodoTable';
 class TodoPage extends Component {
 
     state = {
-        todos: []
+        todos: [],
+        busca: '',
+        selectedTodo:{
+
+        }
     }
 
     // executado após a página ser carregada
@@ -21,15 +25,18 @@ class TodoPage extends Component {
     }
 
     getTodos = () => {
-        return axios.get('http://localhost:3001/todos/')
-            .then((response) => {
-                console.log(response);
-                this.setState({
-                    todos: response.data
-                });
-            }).catch((error) => {
-                console.error(error);
-            })
+        return axios.get('http://localhost:3001/todos/', {
+            params: {
+                busca: this.state.busca
+            }
+        }).then((response) => {
+            console.log(response);
+            this.setState({
+                todos: response.data
+            });
+        }).catch((error) => {
+            console.error(error);
+        })
     }
 
     onExcluirClick = (todo) => {
@@ -108,31 +115,50 @@ class TodoPage extends Component {
             })
     }
 
-    onConcluidaChange = (todoId, concluida) =>{
+    onConcluidaChange = (todoId, concluida) => {
         let method;
-        if(concluida){
+        if (concluida) {
             method = axios.put;
-        }else{
+        } else {
             method = axios.delete;
         }
         method(`http://localhost:3001/todos/${todoId}/completed`)
-         .then(response=> {
-             if(response.status === 204){
-                 return this.getTodos();
-             }
-         }).catch(ex => {
-             console.error(ex, ex.response);
-         });
-     };
+            .then(response => {
+                if (response.status === 204) {
+                    return this.getTodos();
+                }
+            }).catch(ex => {
+                console.error(ex, ex.response);
+            });
+    };
 
-    
+    onBuscaChange = (event) => {
+        this.setState({
+            busca: event.target.value
+        }, () => {
+            clearTimeout(this.buscaTimeout);
+
+            this.buscaTimeout = setTimeout(() => {
+                this.getTodos();
+            }, 1000);
+        });
+    }
 
     render() {
-        const todos = this.state.todos;
+        const { todos, busca } = this.state;
 
         return (
             <section>
                 <h1>Página de Tarefas</h1>
+
+                <FormGroup>
+                    <InputGroup>
+                        <InputGroup.Addon>Buscar</InputGroup.Addon>
+                        <FormControl placeholder="Titulo ou Descricao"
+                            type="text" onChange={this.onBuscaChange} value={busca} />
+                    </InputGroup>
+                </FormGroup>
+
 
                 <Button bsSize="small" bsStyle="success"
                     onClick={this.onNewTodoClick}>
